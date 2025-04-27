@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Farm Matrix Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8f5e9;
+      padding: 20px;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .user {
+      text-align: right;
+      color: green;
+    }
+    .bot {
+      text-align: left;
+      color: blue;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <h2>🌾 Farm Matrix Chatbot 🌾</h2>
+  <div id="chatBox"></div>
+  <input type="text" id="userInput" placeholder="Ask about farming...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+const API_KEY = "AIzaSyDt8M_WRr1Z23Z-G60_epMhnGJN4DIA-zk";  // <-- Put your Gemini API key here
+
+async function sendMessage() {
+  const userInput = document.getElementById('userInput').value;
+  if (!userInput.trim()) return;
+
+  addMessage(userInput, 'user');
+  document.getElementById('userInput').value = '';
+
+   const url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+
+  const payload = {
+    contents: [{
+      parts: [{ text: `You are a farming expert bot. Answer farming-related queries only.\nUser: ${userInput}` }]
+    }]
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    const botReply = data.candidates[0].content.parts[0].text;
+    addMessage(botReply, 'bot');
+  } catch (error) {
+    addMessage("⚠️ Error getting response.", 'bot');
+    console.error(error);
+  }
+}
+
+function addMessage(text, sender) {
+  const chatBox = document.getElementById('chatBox');
+  const message = document.createElement('div');
+  message.className = `message ${sender}`;
+  message.textContent = text;
+  chatBox.appendChild(message);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
+</body>
+</html>
